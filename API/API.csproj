@@ -18,6 +18,8 @@
     <Compile Include="obj\Debug\net7.0\.NETCoreApp,Version=v7.0.AssemblyAttributes.cs" />
     <Compile Include="obj\Debug\net7.0\API.AssemblyInfo.cs" />
     <Compile Include="obj\Debug\net7.0\API.GlobalUsings.g.cs" />
+    <Compile Remove="obj\**" />
+    <Compile Remove="bin\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -90,6 +92,20 @@
     <Content Include="obj\project.nuget.cache" />
     <Content Include="obj\project.packagespec.json" />
     <Content Include="obj\rider.project.restore.info" />
+    <Content Remove="obj\**" />
+    <Content Remove="bin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="obj\**" />
+    <EmbeddedResource Remove="bin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="obj\**" />
+    <None Remove="bin\**" />
+    <None Remove="datingapp.db-shm" />
+    <None Remove="datingapp.db-wal" />
   </ItemGroup>
 
 </Project>
