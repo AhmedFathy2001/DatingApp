@@ -33,16 +33,8 @@ export class NavComponent implements OnInit {
   login() {
     this.accountService.login(this.model).subscribe({
       next: (_) => this.router.navigateByUrl('/members'),
-      error: (err) => {
-        let errorArray = [];
-        if (!err.error.errors) {
-          errorArray.push(err.error);
-        } else {
-          for (const error in err.error.errors) {
-            errorArray.push(err.error.errors[error]);
-          }
-        }
-        errorArray.forEach((error) => this.toastr.error(error));
+      error: (err: string[]) => {
+        err.forEach((error) => this.toastr.error(error));
       },
     });
   }

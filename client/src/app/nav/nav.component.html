@@ -33,6 +33,11 @@
             >
           </li>
         </ng-container>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/errors" routerLinkActive="active"
+            >Errors</a
+          >
+        </li>
       </ul>
 
       <div class="dropdown" *ngIf="currentUser$ | async as user" dropdown>
@@ -40,7 +45,7 @@
           class="dropdown-toggle text-light text-decoration-none"
           dropdownToggle
         >
-          Welcome {{ user.username | titlecase}}
+          Welcome {{ user.username | titlecase }}
         </a>
         <ul id="dropdown-animated" class="dropdown-menu mt-3" *dropdownMenu>
           <a class="dropdown-item">Edit Profile</a>

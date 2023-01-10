@@ -8,12 +8,6 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
-    },
-    "Watch": {
-      "commandName": "Executable",
-      "executablePath": "dotnet",
-      "workingDirectory": "$(ProjectDir)",
-      "commandLineArgs": "watch run"
     }
   }
 }
