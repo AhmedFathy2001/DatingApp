@@ -28,27 +28,6 @@ public class UserRepository : IUserRepository
         return await _context.SaveChangesAsync() > 0;
     }
 
-    // public async Task<IEnumerable<AppUser>> GetUsersAsync()
-    // {
-    //     return await _context.Users
-    //         .Include(user => user.Photos)
-    //         .ToListAsync();
-    // }
-    //
-    // public async Task<AppUser> GetUserByIdAsync(int id)
-    // {
-    //     return await _context.Users
-    //         .Include(user => user.Photos)
-    //         .SingleOrDefaultAsync(user => user.Id == id);
-    // }
-    //
-    // public async Task<AppUser> GetUserByUsernameAsync(string username)
-    // {
-    //     return await _context.Users
-    //         .Include(user => user.Photos)
-    //         .SingleOrDefaultAsync(user => user.UserName == username);
-    // }
-
     public async Task<IEnumerable<MemberDto>> GetMembersAsync()
     {
         return await _context.Users
@@ -70,5 +49,26 @@ public class UserRepository : IUserRepository
             .Where(user => user.UserName == username)
             .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<IEnumerable<AppUser>> GetUsersAsync()
+    {
+        return await _context.Users
+            .Include(user => user.Photos)
+            .ToListAsync();
+    }
+
+    public async Task<AppUser> GetUserByIdAsync(int id)
+    {
+        return await _context.Users
+            .Include(user => user.Photos)
+            .SingleOrDefaultAsync(user => user.Id == id);
+    }
+
+    public async Task<AppUser> GetUserByUsernameAsync(string username)
+    {
+        return await _context.Users
+            .Include(user => user.Photos)
+            .SingleOrDefaultAsync(user => user.UserName == username);
     }
 }
