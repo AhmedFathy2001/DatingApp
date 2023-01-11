@@ -4,13 +4,13 @@
       >Dating App</a
     >
     <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarCollapse"
       aria-controls="navbarCollapse"
       aria-expanded="false"
       aria-label="Toggle navigation"
+      class="navbar-toggler"
+      data-bs-target="#navbarCollapse"
+      data-bs-toggle="collapse"
+      type="button"
     >
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -40,39 +40,39 @@
         </li>
       </ul>
 
-      <div class="dropdown" *ngIf="currentUser$ | async as user" dropdown>
+      <div *ngIf="currentUser$ | async as user" class="dropdown" dropdown>
         <a
           class="dropdown-toggle text-light text-decoration-none"
           dropdownToggle
         >
           Welcome {{ user.username | titlecase }}
         </a>
-        <ul id="dropdown-animated" class="dropdown-menu mt-3" *dropdownMenu>
-          <a class="dropdown-item">Edit Profile</a>
-          <a class="dropdown-item" (click)="logout()">Logout</a>
+        <ul *dropdownMenu class="dropdown-menu mt-3" id="dropdown-animated">
+          <a class="dropdown-item" routerLink="/member/edit">Edit Profile</a>
+          <a (click)="logout()" class="dropdown-item">Logout</a>
         </ul>
       </div>
 
       <form
-        *ngIf="!(currentUser$ | async)"
         #loginForm="ngForm"
-        class="d-flex"
         (ngSubmit)="login()"
+        *ngIf="!(currentUser$ | async)"
         autocomplete="off"
+        class="d-flex"
       >
         <input
-          name="username"
           [(ngModel)]="model.username"
           class="form-control me-2"
-          type="text"
+          name="username"
           placeholder="Username"
+          type="text"
         />
         <input
-          name="password"
           [(ngModel)]="model.password"
           class="form-control me-2"
-          type="password"
+          name="password"
           placeholder="Password"
+          type="password"
         />
         <button class="btn btn-success" type="submit">Login</button>
       </form>
