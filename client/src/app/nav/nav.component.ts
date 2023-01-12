@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { BsDropdownConfig } from 'ngx-bootstrap/dropdown';
 import { ToastrService } from 'ngx-toastr';
-import { of, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 
@@ -20,6 +20,7 @@ import { AccountService } from '../_services/account.service';
 export class NavComponent implements OnInit {
   model: any = {};
   currentUser$: Observable<User | null> = of(null);
+
   constructor(
     private accountService: AccountService,
     private router: Router,
@@ -28,6 +29,7 @@ export class NavComponent implements OnInit {
 
   ngOnInit() {
     this.currentUser$ = this.accountService.currentUser$;
+    console.log(this.currentUser$);
   }
 
   login() {

@@ -41,11 +41,13 @@
       </ul>
 
       <div *ngIf="currentUser$ | async as user" class="dropdown" dropdown>
+        <img [src]="user.photoUrl || './assets/user.png'" alt="user photo" />
         <a
-          class="dropdown-toggle text-light text-decoration-none"
+          class="dropdown-toggle text-light text-decoration-none ms-2"
           dropdownToggle
         >
-          Welcome {{ user.username | titlecase }}
+          Welcome
+          {{ user.username | titlecase }}
         </a>
         <ul *dropdownMenu class="dropdown-menu mt-3" id="dropdown-animated">
           <a class="dropdown-item" routerLink="/member/edit">Edit Profile</a>
