@@ -17,7 +17,7 @@ export class AccountService {
   constructor(private http: HttpClient) {}
 
   login(model: any) {
-    return this.http.post<User>(this.baseUrl + 'account/login', model).pipe(
+    return this.http.post<User>(`${this.baseUrl}account/login`, model).pipe(
       map((res) => {
         const user = res;
         if (user) {
@@ -33,7 +33,7 @@ export class AccountService {
   }
 
   register(model: any) {
-    return this.http.post<User>(this.baseUrl + 'account/register', model).pipe(
+    return this.http.post<User>(`${this.baseUrl}account/register`, model).pipe(
       map((user) => {
         if (user) {
           this.setCurrentUser(user);
@@ -46,4 +46,8 @@ export class AccountService {
     localStorage.removeItem('user');
     this.currentUserSource.next(null);
   }
+
+  // setMembersService(service: MembersService) {
+  //   this.memberService = service;
+  // }
 }

@@ -12,6 +12,8 @@ public class MemberDto
 
     public string KnownAs { get; set; }
 
+    public string Gender { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime LastActive { get; set; }
@@ -27,4 +29,6 @@ public class MemberDto
     public string Country { get; set; }
 
     public List<PhotoDto> Photos { get; set; }
+
+    public bool IsLiked { get; set; }
 }

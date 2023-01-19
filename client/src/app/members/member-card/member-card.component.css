@@ -22,7 +22,7 @@
   opacity: 0;
 }
 
-.card-img-wrapper:hover .member-icons {
+.card:hover .member-icons {
   opacity: 1;
   bottom: 0;
 }

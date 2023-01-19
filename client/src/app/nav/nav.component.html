@@ -47,7 +47,7 @@
           dropdownToggle
         >
           Welcome
-          {{ user.username | titlecase }}
+          {{ user.knownAs }}
         </a>
         <ul *dropdownMenu class="dropdown-menu mt-3" id="dropdown-animated">
           <a class="dropdown-item" routerLink="/member/edit">Edit Profile</a>

@@ -1,6 +1,7 @@
 ﻿using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -11,23 +12,67 @@ namespace API.Controllers;
 [Authorize]
 public class UsersController : BaseApiController
 {
+    private readonly ILikeRepository _likeRepository;
     private readonly IMapper _mapper;
     private readonly IPhotoService _photoService;
     private readonly IUserRepository _userRepository;
 
-    public UsersController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService)
+    public UsersController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService,
+        ILikeRepository likeRepository)
     {
         _userRepository = userRepository;
         _mapper = mapper;
         _photoService = photoService;
+        _likeRepository = likeRepository;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
     {
-        var users = await _userRepository.GetMembersAsync();
+        var currentUser = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
+        userParams.CurrentUsername = currentUser.UserName;
 
-        return Ok(users);
+        if (string.IsNullOrEmpty(userParams.Gender))
+            userParams.Gender = currentUser.Gender == "male" ? "female" : "male";
+
+        var users = await _userRepository.GetMembersAsync(userParams);
+        var usersWithLikes = new PagedList<MemberDto>(
+            users,
+            users.TotalCount,
+            users.CurrentPage,
+            users.PageSize);
+        usersWithLikes.Clear();
+
+        users.ForEach(user =>
+        {
+            usersWithLikes.Add(new MemberDto
+            {
+                UserName = user.UserName,
+                PhotoUrl = user.PhotoUrl,
+                Age = user.Age,
+                City = user.City,
+                KnownAs = user.KnownAs,
+                Country = user.Country,
+                Photos = user.Photos,
+                IsLiked = _likeRepository.GetUserIsLiked(user.Id, User.GetUserId()),
+                CreatedAt = user.CreatedAt,
+                LastActive = user.LastActive,
+                Gender = user.Gender,
+                Interests = user.Interests,
+                Id = user.Id,
+                Introduction = user.Introduction,
+                LookingFor = user.LookingFor
+            });
+        });
+
+        Response.AddPaginationHeader(
+            new PaginationHeader(
+                usersWithLikes.CurrentPage,
+                usersWithLikes.PageSize,
+                usersWithLikes.TotalCount,
+                usersWithLikes.TotalPages));
+
+        return Ok(usersWithLikes);
     }
 
     [HttpGet("{id:int}")]

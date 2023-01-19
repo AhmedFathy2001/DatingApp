@@ -4,6 +4,7 @@ using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,28 +13,30 @@ namespace API.Controllers;
 public class AccountController : BaseApiController
 {
     private readonly DataContext _context;
+    private readonly ILikeRepository _likeRepository;
+    private readonly IMapper _mapper;
     private readonly ITokenService _tokenService;
 
-    public AccountController(DataContext context, ITokenService tokenService)
+    public AccountController(DataContext context, ITokenService tokenService, IMapper mapper,
+        ILikeRepository likeRepository)
     {
         _context = context;
         _tokenService = tokenService;
+        _mapper = mapper;
+        _likeRepository = likeRepository;
     }
 
-    //POST api/account/register
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
         if (await UserExists(registerDto.Username)) return BadRequest("Username is already taken");
-
+        var user = _mapper.Map<AppUser>(registerDto);
         using var hmac = new HMACSHA512();
 
-        var user = new AppUser
-        {
-            UserName = registerDto.Username.ToLower(),
-            PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-            PasswordSalt = hmac.Key
-        };
+
+        user.UserName = registerDto.Username.ToLower();
+        user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+        user.PasswordSalt = hmac.Key;
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
@@ -42,7 +45,8 @@ public class AccountController : BaseApiController
         {
             Username = user.UserName,
             Token = _tokenService.CreateToken(user),
-            PhotoUrl = user.Photos.FirstOrDefault(photo => photo.IsMain)?.Url
+            KnownAs = user.KnownAs,
+            Gender = user.Gender
         };
     }
 
@@ -60,11 +64,14 @@ public class AccountController : BaseApiController
 
         if (computedHash.Where((t, i) => t != user.PasswordHash[i]).Any()) return Unauthorized("Invalid password");
 
+
         return new UserDto
         {
             Username = user.UserName,
             Token = _tokenService.CreateToken(user),
-            PhotoUrl = user.Photos.FirstOrDefault(photo => photo.IsMain)?.Url
+            PhotoUrl = user.Photos.FirstOrDefault(photo => photo.IsMain)?.Url,
+            KnownAs = user.KnownAs,
+            Gender = user.Gender
         };
     }
 

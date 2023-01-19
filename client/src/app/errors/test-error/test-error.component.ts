@@ -13,31 +13,35 @@ export class TestErrorComponent {
   constructor(private http: HttpClient) {}
 
   get404Error() {
-    this.http.get(this.baseUrl + 'buggy/not-found').subscribe({
+    this.http.get(`${this.baseUrl}buggy/not-found`).subscribe({
       next: console.log,
       error: console.log,
     });
   }
+
   get400Error() {
-    this.http.get(this.baseUrl + 'buggy/bad-request').subscribe({
+    this.http.get(`${this.baseUrl}buggy/bad-request`).subscribe({
       next: console.log,
       error: console.log,
     });
   }
+
   get500Error() {
-    this.http.get(this.baseUrl + 'buggy/server-error').subscribe({
+    this.http.get(`${this.baseUrl}buggy/server-error`).subscribe({
       next: console.log,
       error: console.log,
     });
   }
+
   get401Error() {
-    this.http.get(this.baseUrl + 'buggy/auth').subscribe({
+    this.http.get(`${this.baseUrl}buggy/auth`).subscribe({
       next: console.log,
       error: console.log,
     });
   }
+
   get400ValidationError() {
-    this.http.post(this.baseUrl + 'account/register', {}).subscribe({
+    this.http.post(`${this.baseUrl}account/register`, {}).subscribe({
       next: console.log,
       error: (error) => {
         this.validationErrors = error;
