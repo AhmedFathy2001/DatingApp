@@ -6,11 +6,11 @@ using Microsoft.Extensions.Options;
 
 namespace API.Services;
 
-public class PhotoService : IPhotoService
+public class MediaUploadService : IMediaUploadService
 {
     private readonly Cloudinary _cloudinary;
 
-    public PhotoService(IOptions<CloudinarySettings> config)
+    public MediaUploadService(IOptions<CloudinarySettings> config)
     {
         var account = new Account(
             config.Value.CloudName,
@@ -43,5 +43,22 @@ public class PhotoService : IPhotoService
     {
         var deleteParams = new DeletionParams(publicId);
         return await _cloudinary.DestroyAsync(deleteParams);
+    }
+
+    public async Task<VideoUploadResult> AddVideoAsync(IFormFile file)
+    {
+        var uploadResult = new VideoUploadResult();
+
+        if (file.Length <= 0) return uploadResult;
+
+        await using var stream = file.OpenReadStream();
+        var uploadParams = new VideoUploadParams
+        {
+            File = new FileDescription(file.FileName, stream),
+            Folder = "dating-app"
+        };
+        uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+        return uploadResult;
     }
 }

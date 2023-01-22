@@ -14,15 +14,15 @@ public class UsersController : BaseApiController
 {
     private readonly ILikeRepository _likeRepository;
     private readonly IMapper _mapper;
-    private readonly IPhotoService _photoService;
+    private readonly IMediaUploadService _mediaUploadService;
     private readonly IUserRepository _userRepository;
 
-    public UsersController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService,
+    public UsersController(IUserRepository userRepository, IMapper mapper, IMediaUploadService mediaUploadService,
         ILikeRepository likeRepository)
     {
         _userRepository = userRepository;
         _mapper = mapper;
-        _photoService = photoService;
+        _mediaUploadService = mediaUploadService;
         _likeRepository = likeRepository;
     }
 
@@ -91,8 +91,11 @@ public class UsersController : BaseApiController
     {
         var user = await _userRepository.GetMemberByUsernameAsync(username);
 
+
         if (user == null)
             return NotFound();
+
+        user.IsLiked = _likeRepository.GetUserIsLiked(user.Id, User.GetUserId());
 
         return user;
     }
@@ -117,7 +120,7 @@ public class UsersController : BaseApiController
 
         if (user == null) return NotFound();
 
-        var result = await _photoService.AddPhotoAsync(file);
+        var result = await _mediaUploadService.AddPhotoAsync(file);
 
         if (result.Error != null) return BadRequest(result.Error.Message);
 
@@ -177,7 +180,7 @@ public class UsersController : BaseApiController
 
         if (photo.PublicId != null)
         {
-            var result = await _photoService.DeletePhotoAsync(photo.PublicId);
+            var result = await _mediaUploadService.DeletePhotoAsync(photo.PublicId);
 
             if (result.Error != null) return BadRequest(result.Error.Message);
         }

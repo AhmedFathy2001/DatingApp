@@ -43,10 +43,10 @@ export class MemberCardComponent {
         if (!this.member) return;
         this.member.isLiked = false;
         this.toastr.success(`You have unliked ${member.knownAs}`);
+        if (this.onLikeRemoved) {
+          this.onLikeRemoved(member);
+        }
       },
     });
-    if (this.onLikeRemoved) {
-      this.onLikeRemoved(member);
-    }
   }
 }

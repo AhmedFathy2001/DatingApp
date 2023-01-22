@@ -11,6 +11,7 @@ import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import { TimeagoModule } from 'ngx-timeago';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 @NgModule({
   declarations: [],
@@ -31,6 +32,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     ButtonsModule.forRoot(),
     TimeagoModule.forRoot(),
     FontAwesomeModule,
+    ModalModule.forRoot(),
   ],
   exports: [
     BsDropdownModule,
@@ -44,6 +46,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     ButtonsModule,
     TimeagoModule,
     FontAwesomeModule,
+    ModalModule,
   ],
 })
 export class SharedModule {}

@@ -1,1 +1,137 @@
-<p>messages works!</p>
+<div class="mb-4 d-flex">
+  <div class="btn-group" name="container">
+    <button
+      (click)="loadMessages()"
+      [(ngModel)]="container"
+      btnRadio="Unread"
+      class="btn btn-primary"
+    >
+      <fa-icon [icon]="faEnvelope"></fa-icon>
+      Unread
+    </button>
+
+    <button
+      (click)="loadMessages()"
+      [(ngModel)]="container"
+      btnRadio="Inbox"
+      class="btn btn-primary"
+    >
+      <fa-icon [icon]="faEnvelopeOpen"></fa-icon>
+      Inbox
+    </button>
+
+    <button
+      (click)="loadMessages()"
+      [(ngModel)]="container"
+      btnRadio="Outbox"
+      class="btn btn-primary"
+    >
+      <fa-icon [icon]="faPaperPlane"></fa-icon>
+      Outbox
+    </button>
+  </div>
+</div>
+
+<div *ngIf="!messages || messages.length == 0" class="row">
+  <h3>No messages</h3>
+</div>
+
+<div *ngIf="messages && messages.length > 0" class="row">
+  <table class="table table-hover" style="cursor: pointer">
+    <thead>
+      <tr>
+        <th style="width: 40%">Message</th>
+        <th style="width: 20%">From / To</th>
+        <th style="width: 20%">Sent Received</th>
+        <th style="width: 20%"></th>
+      </tr>
+    </thead>
+    <tbody class="align-middle">
+      <tr
+        *ngFor="let message of messages"
+        [fragment]="'id' + message.id.toString()"
+        [hidden]="loading"
+        [queryParams]="{ tab: 'Messages' }"
+        [routerLink]="
+          container === 'Outbox'
+            ? '/members/' + message.recipientUsername
+            : '/members/' + message.senderUsername
+        "
+      >
+        <td>
+          <img
+            *ngIf="message.messageType === 1"
+            [src]="message.mediaUrl"
+            alt="user generated image"
+            style="
+              width: 50px;
+              height: 50px;
+              margin-right: 10px;
+              object-fit: cover;
+            "
+          />
+          <video
+            *ngIf="message.messageType === 2"
+            [src]="message.mediaUrl"
+            alt="user generated image"
+            style="
+              width: 50px;
+              height: 50px;
+              margin-right: 10px;
+              object-fit: cover;
+            "
+          ></video>
+          {{ message.content }}
+        </td>
+        <td>
+          <div *ngIf="container === 'Outbox'">
+            <img
+              [src]="message.recipientPhotoUrl || './assets/user.png'"
+              alt="recipient photo"
+              class="img-circle rounded-circle me-2"
+            />
+            <strong>{{ message.recipientUsername | titlecase }}</strong>
+          </div>
+
+          <div *ngIf="container !== 'Outbox'">
+            <img
+              [src]="message.senderPhotoUrl || './assets/user.png'"
+              alt="recipient photo"
+              class="img-circle rounded-circle me-2"
+            />
+            <strong>{{ message.senderUsername | titlecase }}</strong>
+          </div>
+        </td>
+        <td>{{ message.messageSent + "Z" | timeago }}</td>
+        <td>
+          <button
+            (click)="$event.stopPropagation()"
+            (click)="deleteMessage(message.id)"
+            class="btn btn-danger"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div
+  *ngIf="!loading && pagination && messages && messages.length > 0"
+  class="d-flex justify-content-center"
+>
+  <pagination
+    (pageChanged)="pageChanged($event)"
+    [boundaryLinks]="true"
+    [itemsPerPage]="pagination.itemsPerPage"
+    [maxSize]="10"
+    [ngModel]="pagination.currentPage"
+    [totalItems]="pagination.totalItems"
+    firstText="&laquo;"
+    lastText="&raquo;"
+    nextText="&rsaquo;"
+    previousText="&lsaquo;"
+  >
+  </pagination>
+</div>
