@@ -120,7 +120,7 @@ public class UsersController : BaseApiController
 
         if (user == null) return NotFound();
 
-        var result = await _mediaUploadService.AddPhotoAsync(file);
+        var result = await _mediaUploadService.AddPhotoAsync(file, true);
 
         if (result.Error != null) return BadRequest(result.Error.Message);
 
@@ -180,9 +180,13 @@ public class UsersController : BaseApiController
 
         if (photo.PublicId != null)
         {
-            var result = await _mediaUploadService.DeletePhotoAsync(photo.PublicId);
+            var result = await _mediaUploadService.DeleteMediaAsync(new List<string>
+            {
+                photo.PublicId
+            });
 
-            if (result.Error != null) return BadRequest(result.Error.Message);
+            foreach (var t in result.Where(t => t.Error != null))
+                return BadRequest(t.Error.Message);
         }
 
         user.Photos.Remove(photo);

@@ -60,8 +60,8 @@
       >
         <td>
           <img
-            *ngIf="message.messageType === 1"
-            [src]="message.mediaUrl"
+            *ngIf="message.messageType === 1 && message.media[0].type === 0"
+            [src]="message.media[0].url"
             alt="user generated image"
             style="
               width: 50px;
@@ -71,8 +71,8 @@
             "
           />
           <video
-            *ngIf="message.messageType === 2"
-            [src]="message.mediaUrl"
+            *ngIf="message.messageType === 1 && message.media[0].type === 1"
+            [src]="message.media[0].url"
             alt="user generated image"
             style="
               width: 50px;

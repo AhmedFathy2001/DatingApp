@@ -20,9 +20,7 @@ public class Message
 
     public string Content { get; set; }
 
-    public string MediaUrl { get; set; }
-
-    public string MediaPublicId { get; set; }
+    public IEnumerable<Media> Media { get; set; }
 
     public MessageType MessageType { get; set; }
 

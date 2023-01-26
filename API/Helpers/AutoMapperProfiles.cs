@@ -34,6 +34,11 @@ public class AutoMapperProfiles : Profile
                         .FirstOrDefault(u => u.IsMain).Url)).ForMember(d => d.RecipientPhotoUrl,
                 o => o.MapFrom(
                     r => r.Recipient.Photos
-                        .FirstOrDefault(u => u.IsMain).Url));
+                        .FirstOrDefault(u => u.IsMain).Url)).ForMember(d => d.RecipientPhotoUrl,
+                o => o.MapFrom(
+                    r => r.Recipient.Photos
+                        .FirstOrDefault(u => u.IsMain).Url)).ForMember(dto => dto.Media,
+                opt => opt.MapFrom(m => m.Media.ToList()));
+        ;
     }
 }

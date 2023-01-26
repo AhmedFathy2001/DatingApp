@@ -30,5 +30,6 @@ public class MemberDto
 
     public List<PhotoDto> Photos { get; set; }
 
+
     public bool IsLiked { get; set; }
 }

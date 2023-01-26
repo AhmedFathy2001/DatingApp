@@ -1,125 +1,104 @@
-import {
-  Component,
-  DoCheck,
-  ElementRef,
-  Input,
-  OnInit,
-  TemplateRef,
-  ViewChild,
-} from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { Message } from '../../_models/message';
 import { MessageService } from '../../_services/message.service';
-import {
-  faCirclePlay,
-  faClock,
-  faImage,
-} from '@fortawesome/free-solid-svg-icons';
 import { User } from '../../_models/user';
 import { AccountService } from '../../_services/account.service';
 import { take } from 'rxjs';
+import { MediaType, MessageType } from '../../_models/createMessage';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
-import { MessageType } from '../../_models/createMessage';
 import { ToastrService } from 'ngx-toastr';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import { ActivatedRoute } from '@angular/router';
-import { NgForm } from '@angular/forms';
+import { MessageFormComponent } from './message-form/message-form.component';
+import { IMediaFile } from '../../_models/mediafile';
 
-//clean up this component to separate components, form, message box, and message
 @Component({
   selector: 'app-member-messages',
   templateUrl: './member-messages.component.html',
   styleUrls: ['./member-messages.component.css'],
 })
-export class MemberMessagesComponent implements OnInit, DoCheck {
-  @ViewChild('messageForm') messageForm: NgForm | undefined;
-  @ViewChild('chat') chatbox: ElementRef | undefined;
+export class MemberMessagesComponent {
+  @ViewChild(MessageFormComponent) form: MessageFormComponent | undefined;
   @Input() username: string | undefined;
   @Input() messages: Message[] = [];
-  faClock = faClock;
-  faImage = faImage;
   user: User | null = null;
-  mediaFile: string | ArrayBuffer | null = null;
-  file: File | undefined;
-  content: string = '';
-  faCirclePlay = faCirclePlay;
-  openedFileSrc: string | undefined;
-  openedFileType: MessageType | undefined;
-  openedFileContent: string | undefined;
-  modalRef?: BsModalRef;
-  fragment: string | null = null;
-  hasLoaded = false;
+  isHovering = false;
 
   constructor(
     private messageService: MessageService,
     private accountService: AccountService,
-    private toastr: ToastrService,
-    private modalService: BsModalService,
-    private route: ActivatedRoute
+    private toastr: ToastrService
   ) {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
       if (user) this.user = user;
     });
   }
 
-  openModal(
-    content: TemplateRef<any>,
-    mediaUrl: string,
-    messageType: MessageType,
-    openedFileContent?: string
-  ) {
-    this.openedFileSrc = mediaUrl;
-    this.openedFileType = messageType;
-    this.openedFileContent = openedFileContent;
-    this.modalRef = this.modalService.show(content, {
-      class: 'modal-dialog-centered',
-    });
+  updateHoveringState(event: boolean) {
+    this.isHovering = event;
   }
 
-  sendMessage() {
+  sendMessage(event: { content: string; files: File[] | undefined }) {
+    const { content, files } = event;
+
+    const mediaFiles: IMediaFile[] = [];
     const maxFileSize = 20 * 1024 * 1024;
     if (!this.username) return;
 
-    if (this.content.trim().length === 0 && this.file == null) return;
+    if (content.trim().length === 0 && files == null) return;
 
+    let mediaType = MediaType.Image;
     let messageType = MessageType.Text;
-
-    if (this.file) {
-      const fileType = this.file.type.split('/')[0];
-      if (fileType === 'image') {
-        messageType = MessageType.Image;
-      } else if (fileType === 'video') {
-        messageType = MessageType.Video;
-      } else {
-        this.file = undefined;
-        messageType = MessageType.Text;
-        this.toastr.error(
-          'Unsupported media type, supported types: image/video'
-        );
+    if (files) {
+      if (files.length > 6) {
+        this.toastr.error('Media count should not exceed 6 per message');
         return;
       }
+      messageType = MessageType.Files;
+      files.forEach((file) => {
+        const fileType = file.type.split('/')[0];
 
-      if (this.file.size > maxFileSize) {
-        this.file = undefined;
-        messageType = MessageType.Text;
-        this.toastr.error('File size is too large, max file size is 20mb');
-        return;
-      }
+        switch (fileType) {
+          case 'image':
+            mediaType = MediaType.Image;
+            break;
+          case 'video':
+            mediaType = MediaType.Video;
+            break;
+          default:
+            this.toastr.error(
+              'Unsupported media type, supported types: image/video'
+            );
+            return;
+        }
+
+        if (file.size > maxFileSize) {
+          this.toastr.error(
+            `File size is too large, max file size is 20mb ${file.name}`
+          );
+          return;
+        }
+        mediaFiles.push({ file, mediaType });
+      });
     }
 
     this.messageService
       .sendMessage(
         {
           username: this.username,
-          content: this.content,
+          content: content,
           messageType,
         },
-        this.file
+        mediaFiles
       )
       .subscribe((event: HttpEvent<Message>) => {
-        if (event.type === HttpEventType.Response) {
-          console.log(event.body);
+        if (event.type === HttpEventType.UploadProgress) {
+          if (event.loaded && event.total && event.total > 0) {
+            console.log(event.loaded / event.total);
+          }
+        } else if (event.type === HttpEventType.Response) {
           if (event.ok) {
-            this.resetForm();
+            if (this.form) {
+              this.form.resetForm();
+            }
             if (event.body) {
               this.messages.push(event.body);
               setTimeout(() => {
@@ -134,64 +113,13 @@ export class MemberMessagesComponent implements OnInit, DoCheck {
       });
   }
 
-  addToQueue(event: File[] | Event) {
-    let file: File | null = null;
-    if ('target' in event) {
-      const target = event.target as HTMLInputElement;
-      if (target && target.files) file = target.files[0];
-    } else {
-      if (FileReader && event.length > 0) {
-        file = event[0];
-      }
-    }
-
-    const fr = new FileReader();
-    fr.onload = () => {
-      this.mediaFile = fr.result;
-    };
-    if (file) {
-      this.file = file;
-      fr.readAsDataURL(file);
-    }
-  }
-
-  clearMedia() {
-    this.file = undefined;
-    this.mediaFile = null;
-  }
-
-  resetForm() {
-    this.messageForm?.reset();
-    this.clearMedia();
-  }
-
   scrollTo(el: HTMLElement, smooth: boolean = true) {
     el.scrollIntoView({
       behavior: smooth ? 'smooth' : 'auto',
     });
   }
 
-  ngDoCheck(): void {
-    const fragment = this.route.snapshot.fragment;
-    if (!this.chatbox && !fragment) return;
-    let el = document.getElementById(fragment ?? '');
-    if (!el && this.chatbox) {
-      el = document.getElementById(
-        this.chatbox.nativeElement.lastChild.previousSibling.querySelector(
-          '.chat-body'
-        ).id
-      );
-    }
-
-    if (el && !this.hasLoaded) {
-      this.hasLoaded = true;
-      this.scrollTo(el, !(fragment === null));
-      this.fragment = fragment;
-      setTimeout(() => {
-        this.fragment = null;
-      }, 2000);
-    }
+  updateForm(file: File[]) {
+    this.form?.addToQueue(file);
   }
-
-  ngOnInit(): void {}
 }

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { getPaginatedResults, getPaginationHeaders } from './paginationHelper';
 import { Message } from '../_models/message';
 import { ICreateMessage } from '../_models/createMessage';
+import { IMediaFile } from '../_models/mediafile';
 
 @Injectable({
   providedIn: 'root',
@@ -29,11 +30,15 @@ export class MessageService {
     );
   }
 
-  sendMessage(createMessage: ICreateMessage, file?: File) {
+  sendMessage(createMessage: ICreateMessage, files?: IMediaFile[]) {
     const formData = new FormData();
 
-    if (file) {
-      formData.append('file', file);
+    //messageType == 1 -> messageType.files
+    if (files && createMessage.messageType == 1) {
+      files.forEach((media) => {
+        formData.append('files', media.file);
+        formData.append('messageTypes', media.mediaType.toString());
+      });
     }
 
     formData.append('recipientUsername', createMessage.username);

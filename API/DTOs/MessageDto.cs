@@ -1,3 +1,4 @@
+using API.Entities;
 using API.Interfaces;
 
 namespace API.DTOs;
@@ -20,9 +21,7 @@ public class MessageDto
 
     public string Content { get; set; }
 
-    public string MediaUrl { get; set; }
-
-    public string MediaPublicId { get; set; }
+    public IEnumerable<Media> Media { get; set; }
 
     public MessageType MessageType { get; set; }
 

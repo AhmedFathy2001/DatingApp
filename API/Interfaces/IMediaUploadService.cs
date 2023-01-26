@@ -4,9 +4,9 @@ namespace API.Interfaces;
 
 public interface IMediaUploadService
 {
-    Task<ImageUploadResult> AddPhotoAsync(IFormFile file);
+    Task<ImageUploadResult> AddPhotoAsync(IFormFile file, bool isProfilePicture);
 
-    Task<DeletionResult> DeletePhotoAsync(string publicId);
+    Task<List<DeletionResult>> DeleteMediaAsync(IEnumerable<string> publicId);
 
     Task<VideoUploadResult> AddVideoAsync(IFormFile file);
 }

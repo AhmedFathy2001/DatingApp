@@ -21,28 +21,18 @@ public class MediaUploadService : IMediaUploadService
         _cloudinary = new Cloudinary(account);
     }
 
-    public async Task<ImageUploadResult> AddPhotoAsync(IFormFile file)
+    public async Task<List<DeletionResult>> DeleteMediaAsync(IEnumerable<string> publicIds)
     {
-        var uploadResult = new ImageUploadResult();
-
-        if (file.Length <= 0) return uploadResult;
-
-        await using var stream = file.OpenReadStream();
-        var uploadParams = new ImageUploadParams
+        var deletionResult = new List<DeletionResult>();
+        foreach (var publicId in publicIds)
         {
-            File = new FileDescription(file.FileName, stream),
-            Transformation = new Transformation().Height(500).Width(500).Crop("fill").Gravity("face"),
-            Folder = "dating-app"
-        };
-        uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            var deleteParams = new DeletionParams(publicId);
+            var delete = await _cloudinary.DestroyAsync(deleteParams);
 
-        return uploadResult;
-    }
+            deletionResult.Add(delete);
+        }
 
-    public async Task<DeletionResult> DeletePhotoAsync(string publicId)
-    {
-        var deleteParams = new DeletionParams(publicId);
-        return await _cloudinary.DestroyAsync(deleteParams);
+        return deletionResult;
     }
 
     public async Task<VideoUploadResult> AddVideoAsync(IFormFile file)
@@ -55,6 +45,27 @@ public class MediaUploadService : IMediaUploadService
         var uploadParams = new VideoUploadParams
         {
             File = new FileDescription(file.FileName, stream),
+            Folder = "dating-app"
+        };
+        uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+        return uploadResult;
+    }
+
+    public async Task<ImageUploadResult> AddPhotoAsync(IFormFile file, bool isProfilePicture)
+    {
+        var uploadResult = new ImageUploadResult();
+
+        if (file.Length <= 0) return uploadResult;
+
+        await using var stream = file.OpenReadStream();
+        var transformation = isProfilePicture
+            ? new Transformation().Height(500).Width(500).Crop("fill").Gravity("face")
+            : null;
+        var uploadParams = new ImageUploadParams
+        {
+            File = new FileDescription(file.FileName, stream),
+            Transformation = transformation,
             Folder = "dating-app"
         };
         uploadResult = await _cloudinary.UploadAsync(uploadParams);

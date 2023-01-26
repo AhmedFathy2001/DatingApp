@@ -29,37 +29,65 @@ public class MessagesController : BaseApiController
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<MessageDto>> CreateMessage([FromForm] CreateMessageDto createMessageDto)
     {
+        var files = new List<IMediaFile>();
+
+        if (files.Count > 6) files = files.Take(6).ToList();
+        if (files.Select(file => MimeTypes.GetMimeType(file.File.Name)).Any(mimeType =>
+                !mimeType.StartsWith("image/") && !mimeType.StartsWith("video/")))
+            return BadRequest("File type not supported, supported types: Image/Video");
+
         var username = User.GetUsername();
-        string mediaUrl = null;
-        string mediaPublicId = null;
-        UploadResult result = null;
         if ((createMessageDto.Content == null || createMessageDto.Content.Trim().Length == 0) &&
-            createMessageDto.File == null)
+            createMessageDto.Files == null)
             return BadRequest("Cannot send empty message.");
 
         if (username == createMessageDto.RecipientUsername.ToLower()) return BadRequest("You cannot message yourself");
 
-        if (createMessageDto.MessageType != MessageType.Text && createMessageDto.File == null)
-            BadRequest("Media files not attached");
+        if (createMessageDto.MessageType != MessageType.Text && createMessageDto.Files == null)
+            return BadRequest("Media files not attached");
 
-        if (createMessageDto.MessageType == MessageType.Image)
-            result = await _mediaUploadService.AddPhotoAsync(createMessageDto.File);
-
-        if (createMessageDto.MessageType == MessageType.Video)
-            result = await _mediaUploadService.AddVideoAsync(createMessageDto.File);
-
-        if (createMessageDto.File != null && result != null)
-        {
-            if (result.Error != null) return BadRequest(result.Error.Message);
-
-            mediaUrl = result.SecureUrl.AbsoluteUri;
-            mediaPublicId = result.PublicId;
-        }
 
         var sender = await _userRepository.GetUserByUsernameAsync(username);
         var recipient = await _userRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername);
 
         if (recipient == null) return NotFound();
+
+        if (createMessageDto.MessageType == MessageType.Files &&
+            createMessageDto.Files.Count() == createMessageDto.MessageTypes.Count())
+            for (var i = 0; i < createMessageDto.Files.Count(); i++)
+                files.Add(new MediaFile
+                {
+                    File = createMessageDto.Files.ElementAt(i),
+                    Type = createMessageDto.MessageTypes.ElementAt(i)
+                });
+
+        var media = new List<Media>();
+
+        if (files.Any())
+            foreach (var file in files)
+            {
+                UploadResult result = file.Type switch
+                {
+                    MediaType.Image => await _mediaUploadService.AddPhotoAsync(file.File, false),
+                    MediaType.Video => await _mediaUploadService.AddVideoAsync(file.File),
+                    _ => null
+                };
+
+                if (result != null)
+                {
+                    if (result.Error != null) return BadRequest(result.Error.Message);
+
+                    file.Url = result.SecureUrl.AbsoluteUri;
+                    file.PublicId = result.PublicId;
+
+                    media.Add(new Media
+                    {
+                        Url = result.SecureUrl.AbsoluteUri,
+                        PublicId = result.PublicId,
+                        Type = file.Type
+                    });
+                }
+            }
 
         var message = new Message
         {
@@ -69,25 +97,34 @@ public class MessagesController : BaseApiController
             RecipientUsername = recipient.UserName,
             Content = createMessageDto.Content,
             MessageType = createMessageDto.MessageType,
-            MediaUrl = mediaUrl,
-            MediaPublicId = mediaPublicId
+            Media = media
         };
 
         _messageRepository.AddMessage(message);
 
         if (!await _messageRepository.SaveAllAsync()) return BadRequest("Failed to send message");
-        switch (createMessageDto.MessageType)
-        {
-            case MessageType.Text:
-                return CreatedAtAction("CreateMessage", _mapper.Map<MessageDto>(message));
-            case MessageType.Image:
-            case MessageType.Video:
-                if (result != null) return Created(result.SecureUrl, _mapper.Map<MessageDto>(message));
-                break;
-            default: return BadRequest("Unhandled message type");
-        }
 
-        return BadRequest("Failed to send message");
+        var messageDto = new MessageDto
+        {
+            Id = message.Id,
+            SenderId = sender.Id,
+            SenderUsername = sender.UserName,
+            SenderPhotoUrl = sender.Photos.FirstOrDefault(p => p.IsMain)?.Url,
+            RecipientId = recipient.Id,
+            RecipientUsername = recipient.UserName,
+            RecipientPhotoUrl = recipient.Photos.FirstOrDefault(p => p.IsMain)?.Url,
+            Content = createMessageDto.Content,
+            Media = media,
+            MessageType = createMessageDto.MessageType,
+            MessageSent = DateTime.UtcNow
+        };
+
+        return createMessageDto.MessageType switch
+        {
+            MessageType.Text => CreatedAtAction(nameof(CreateMessage), messageDto),
+            MessageType.Files => Ok(messageDto),
+            _ => BadRequest("Unhandled message type")
+        };
     }
 
     [HttpGet]
@@ -99,6 +136,7 @@ public class MessagesController : BaseApiController
 
         Response.AddPaginationHeader(new PaginationHeader(messages.CurrentPage, messages.PageSize, messages.TotalCount,
             messages.TotalPages));
+
 
         return messages;
     }
@@ -118,12 +156,25 @@ public class MessagesController : BaseApiController
 
         var message = await _messageRepository.GetMessage(id);
 
+        if (message == null) return NotFound();
+
         if (message.SenderUsername != username && message.RecipientUsername != username) return Unauthorized();
 
         if (message.SenderUsername == username) message.SenderDeleted = true;
         if (message.RecipientUsername == username) message.RecipientDeleted = true;
 
-        if (message.SenderDeleted && message.RecipientDeleted) _messageRepository.DeleteMessage(message);
+        if (message.SenderDeleted && message.RecipientDeleted)
+        {
+            if (message.MessageType == MessageType.Files && message.Media != null)
+
+            {
+                var mediaList = message.Media.Select(m => m.PublicId).ToList();
+                if (mediaList.Any())
+                    await _mediaUploadService.DeleteMediaAsync(mediaList);
+            }
+
+            _messageRepository.DeleteMessage(message);
+        }
 
         if (await _messageRepository.SaveAllAsync()) return Ok();
 

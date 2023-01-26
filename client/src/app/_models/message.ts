@@ -1,3 +1,6 @@
+import { Media } from './media';
+import { MediaType } from './createMessage';
+
 export interface Message {
   id: number;
   senderId: number;
@@ -7,8 +10,8 @@ export interface Message {
   recipientUsername: string;
   recipientPhotoUrl: string;
   content: string;
-  mediaUrl?: string;
-  messageType: number;
+  media: Media[];
+  messageType: MediaType;
   dateRead?: Date;
   messageSent: Date;
 }

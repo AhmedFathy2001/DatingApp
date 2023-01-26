@@ -11,7 +11,6 @@ import { ToastrService } from 'ngx-toastr';
 import { TabDirective, TabsetComponent } from 'ngx-bootstrap/tabs';
 import { MessageService } from '../../_services/message.service';
 import { Message } from '../../_models/message';
-import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-member-detail',
@@ -23,9 +22,7 @@ export class MemberDetailComponent implements OnInit {
     | TabsetComponent
     | undefined;
   messages: Message[] = [];
-  messagesHaveLoaded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
-    false
-  );
+
   member: Member = {} as Member;
   galleryOptions: NgxGalleryOptions[] = [];
   galleryImages: NgxGalleryImage[] = [];
@@ -110,7 +107,6 @@ export class MemberDetailComponent implements OnInit {
       this.messageService.getMessageThread(this.member.userName).subscribe({
         next: (messages) => {
           this.messages = messages;
-          this.messagesHaveLoaded$.next(true);
         },
       });
     }

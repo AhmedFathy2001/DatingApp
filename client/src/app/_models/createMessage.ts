@@ -6,6 +6,10 @@ export interface ICreateMessage {
 
 export enum MessageType {
   Text,
+  Files,
+}
+
+export enum MediaType {
   Image,
   Video,
 }

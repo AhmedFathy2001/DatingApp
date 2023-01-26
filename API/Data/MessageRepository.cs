@@ -31,7 +31,8 @@ public class MessageRepository : IMessageRepository
 
     public async Task<Message> GetMessage(int id)
     {
-        return await _context.Messages.FindAsync(id);
+        return await _context.Messages.Include(m => m.Media)
+            .SingleOrDefaultAsync(m => m.Id == id);
     }
 
     public async Task<bool> SaveAllAsync()
@@ -42,6 +43,7 @@ public class MessageRepository : IMessageRepository
     public async Task<PagedList<MessageDto>> GetMessagesForUser(MessageParams messageParams)
     {
         var query = _context.Messages
+            .Include(m => m.Media)
             .OrderByDescending(x => x.MessageSent)
             .AsQueryable();
 
@@ -53,7 +55,8 @@ public class MessageRepository : IMessageRepository
                 u.RecipientUsername == messageParams.Username && u.DateRead == null && u.RecipientDeleted == false)
         };
 
-        var messages = query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider);
+        var messages = query
+            .ProjectTo<MessageDto>(_mapper.ConfigurationProvider);
 
         return await PagedList<MessageDto>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
     }
@@ -63,6 +66,7 @@ public class MessageRepository : IMessageRepository
         var messages = await _context.Messages
             .Include(u => u.Sender).ThenInclude(p => p.Photos)
             .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+            .Include(m => m.Media)
             .Where(
                 m =>
                     (m.RecipientUsername == currentUsername && m.RecipientDeleted == false
