@@ -1,0 +1,36 @@
+<ng-template #template>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">
+      {{ openedFileType === 0 ? "Image Viewer" : "Video Viewer" }}
+    </h4>
+    <button
+      (click)="modalRef.hide()"
+      aria-label="Close"
+      class="btn-close close pull-right"
+      type="button"
+    >
+      <span aria-hidden="true" class="visually-hidden">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="modal-body">
+      <div class="message-media-modal">
+        <div *ngIf="openedFileType == 0 && openedFileSrc">
+          <img [src]="openedFileSrc" alt="user generated media" />
+        </div>
+        <div
+          *ngIf="openedFileType == 1 && openedFileSrc"
+          class="message-media-video"
+        >
+          <video [src]="openedFileSrc" autoplay controls></video>
+        </div>
+      </div>
+    </div>
+    <div
+      *ngIf="openedFileContent"
+      class="modal-footer text-start justify-content-start"
+    >
+      <p>{{ openedFileContent }}</p>
+    </div>
+  </div>
+</ng-template>

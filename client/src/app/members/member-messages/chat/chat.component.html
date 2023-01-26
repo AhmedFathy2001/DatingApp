@@ -1,0 +1,77 @@
+<div
+  (fileOver)="onDragOver($event)"
+  (onFileDrop)="onDrop($event)"
+  class="card-body"
+  ng2FileDrop
+>
+  <div *ngIf="messages.length === 0" class="chat">
+    No messages yet... say hi by using the message box below!
+  </div>
+
+  <ul #chat *ngIf="messages.length > 0" class="chat" pinScroll>
+    <li *ngFor="let message of messages">
+      <div>
+        <span class="chat-img float-end">
+          <img
+            [src]="message.senderPhotoUrl || './assets/user.png'"
+            alt="image of the user"
+            class="rounded-circle"
+          />
+        </span>
+        <div
+          [id]="'id' + message.id.toString()"
+          [ngClass]="{ highlight: 'id' + message.id.toString() === fragment }"
+          class="chat-body"
+        >
+          <div class="header mb-2">
+            <small class="text-muted">
+              <span>
+                <fa-icon [icon]="faClock"></fa-icon>
+                {{ message.messageSent + "Z" | timeago }}
+              </span>
+              <span
+                *ngIf="!message.dateRead && message.senderUsername !== username"
+                class="text-danger"
+              >
+                (unread)
+              </span>
+              <span
+                *ngIf="message.dateRead && message.senderUsername !== username"
+                class="text-success"
+              >
+                (read
+                {{ message.dateRead + "Z" | timeago }})
+              </span>
+            </small>
+          </div>
+          <p *ngIf="message.content">{{ message.content }}</p>
+
+          <div
+            *ngIf="message.messageType != 0 && message.media.length > 0"
+            class="media-wrapper"
+          >
+            <div
+              (click)="openModal(message, m.id)"
+              *ngFor="let m of message.media"
+              class="message-media"
+            >
+              <div *ngIf="m.type == 0 && m.url">
+                <img [src]="m.url" alt="user generated media" />
+              </div>
+              <div *ngIf="m.type == 1 && m.url" class="message-media-video">
+                <fa-icon [icon]="faCirclePlay" class="play-icon"></fa-icon>
+                <video [src]="m.url"></video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<app-media-modal
+  [openedFileContent]="previewContent"
+  [openedFileSrc]="previewSrc"
+  [openedFileType]="previewType"
+></app-media-modal>
