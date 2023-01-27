@@ -8,6 +8,7 @@ import {
   faHeartCrack,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
+import { PresenceService } from '../../_services/presence.service';
 
 @Component({
   selector: 'app-member-card',
@@ -24,7 +25,8 @@ export class MemberCardComponent {
 
   constructor(
     private memberService: MembersService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    public presenceService: PresenceService
   ) {}
 
   addLike(member: Member) {

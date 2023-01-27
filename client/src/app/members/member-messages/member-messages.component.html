@@ -2,7 +2,7 @@
   <app-chat
     (fileDropped)="updateForm($event)"
     (isHovering)="updateHoveringState($event)"
-    [messages]="messages"
+    [username]="username"
   ></app-chat>
   <app-message-form
     (onSubmit)="sendMessage($event)"

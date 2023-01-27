@@ -10,6 +10,7 @@ import { faCirclePlay, faClock } from '@fortawesome/free-solid-svg-icons';
 import { MediaType } from '../../../_models/createMessage';
 import { MediaModalComponent } from '../../../modals/media-modal/media-modal.component';
 import { ActivatedRoute } from '@angular/router';
+import { MessageService } from '../../../_services/message.service';
 
 //implement scroll to bottom of the chat
 @Component({
@@ -20,7 +21,7 @@ import { ActivatedRoute } from '@angular/router';
 export class ChatComponent {
   @ViewChild(MediaModalComponent) modal: MediaModalComponent | undefined;
   @Input() username: string | undefined;
-  @Input() messages: Message[] = [];
+  // @Input() messages: Message[] = [];
   fragment: string | null = null;
   faClock = faClock;
   faCirclePlay = faCirclePlay;
@@ -31,8 +32,15 @@ export class ChatComponent {
 
   @Output() fileDropped = new EventEmitter<File[]>();
   @Output() isHovering = new EventEmitter<boolean>();
+  messages: Message[] = [];
 
-  constructor(private route: ActivatedRoute) {
+  constructor(
+    private route: ActivatedRoute,
+    private messageService: MessageService
+  ) {
+    messageService.messageThread$.subscribe((messages) => {
+      this.messages = messages;
+    });
     if (this.route.snapshot.fragment) {
       this.fragment = this.route.snapshot.fragment;
       setTimeout(() => {

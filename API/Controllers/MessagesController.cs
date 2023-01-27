@@ -3,7 +3,6 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
-using AutoMapper;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,18 +10,16 @@ namespace API.Controllers;
 
 public class MessagesController : BaseApiController
 {
-    private readonly IMapper _mapper;
     private readonly IMediaUploadService _mediaUploadService;
     private readonly IMessageRepository _messageRepository;
     private readonly IUserRepository _userRepository;
 
     public MessagesController(IUserRepository userRepository, IMessageRepository messageRepository,
-        IMediaUploadService mediaUploadService, IMapper mapper)
+        IMediaUploadService mediaUploadService)
     {
         _userRepository = userRepository;
         _messageRepository = messageRepository;
         _mediaUploadService = mediaUploadService;
-        _mapper = mapper;
     }
 
     [HttpPost]
@@ -119,6 +116,8 @@ public class MessagesController : BaseApiController
             MessageSent = DateTime.UtcNow
         };
 
+        // var group = GetGroupName(sender.UserName, recipient.UserName);
+        // await Clients.Group(group).SendAsync("NewMessage", messageDto);
         return createMessageDto.MessageType switch
         {
             MessageType.Text => CreatedAtAction(nameof(CreateMessage), messageDto),
@@ -126,6 +125,14 @@ public class MessagesController : BaseApiController
             _ => BadRequest("Unhandled message type")
         };
     }
+
+    // private string GetGroupName(string caller, string other)
+    // {
+    //     var stringCompare = string.CompareOrdinal(caller, other) < 0;
+    //
+    //     return stringCompare ? $"{caller}-{other}" : $"{other}-{caller}";
+    // }
+
 
     [HttpGet]
     public async Task<ActionResult<PagedList<MessageDto>>> GetMessagesForUser([FromQuery] MessageParams messageParams)

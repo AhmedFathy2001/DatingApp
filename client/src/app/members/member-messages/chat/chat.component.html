@@ -27,7 +27,7 @@
             <small class="text-muted">
               <span>
                 <fa-icon [icon]="faClock"></fa-icon>
-                {{ message.messageSent + "Z" | timeago }}
+                {{ message.messageSent | timeago }}
               </span>
               <span
                 *ngIf="!message.dateRead && message.senderUsername !== username"
@@ -40,7 +40,7 @@
                 class="text-success"
               >
                 (read
-                {{ message.dateRead + "Z" | timeago }})
+                {{ message.dateRead | timeago }})
               </span>
             </small>
           </div>

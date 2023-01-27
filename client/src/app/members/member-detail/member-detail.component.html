@@ -7,6 +7,15 @@
         src="{{ member.photoUrl || './assets/user.png' }}"
       />
       <div class="card-body">
+        <div
+          *ngIf="
+            (presenceService.onlineUsers$ | async)?.includes(member.userName)
+          "
+          class="mb-2"
+        >
+          <fa-icon [icon]="faUserCircle" class="text-success"></fa-icon>
+          Online now
+        </div>
         <div>
           <strong>Location:</strong>
           <p>{{ member.city }}, {{ member.country }}</p>
@@ -17,11 +26,11 @@
         </div>
         <div>
           <strong>Last active:</strong>
-          <p>{{ member.lastActive + "Z" | timeago : "live" }}</p>
+          <p>{{ member.lastActive | timeago : "live" }}</p>
         </div>
         <div>
           <strong>Member since:</strong>
-          <p>{{ member.createdAt + "Z" | date : "longDate" }}</p>
+          <p>{{ member.createdAt | date : "longDate" }}</p>
         </div>
         <div class="card-footer">
           <div class="btn-group d-flex">
@@ -75,10 +84,7 @@
         </ngx-gallery>
       </tab>
       <tab (selectTab)="onTabActivated($event)" heading="Messages">
-        <app-member-messages
-          [messages]="messages"
-          [username]="member.userName"
-        ></app-member-messages>
+        <app-member-messages [username]="member.userName"></app-member-messages>
       </tab>
     </tabset>
   </div>

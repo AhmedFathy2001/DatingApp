@@ -10,24 +10,24 @@
       ng2FileSelect
     >
       <div
-        (click)="openModal(f.file, mediaFiles[i])"
+        (click)="openModal(f.file, mediaFiles[i].url)"
         *ngFor="let f of files; let i = index"
         class="media-preview"
       >
         <div
-          (click)="removePreviewFile(f.id, mediaFiles[i])"
+          (click)="removePreviewFile(f.id, mediaFiles[i].id)"
           class="close-button"
         >
           x
         </div>
         <img
-          *ngIf="f.file.type.split('/')[0] === 'image'"
-          [src]="mediaFiles[i]"
+          *ngIf="mediaFiles[i]?.url && f.file.type.split('/')[0] === 'image'"
+          [src]="mediaFiles[i].url"
           alt=""
         />
         <video
-          *ngIf="f.file.type.split('/')[0] === 'video'"
-          [src]="mediaFiles[i]"
+          *ngIf="mediaFiles[i]?.url && f.file.type.split('/')[0] === 'video'"
+          [src]="mediaFiles[i].url"
         ></video>
       </div>
     </div>
@@ -63,7 +63,6 @@
       <input
         (fileOver)="onFileOver($event)"
         (onFileDrop)="addToQueue($event)"
-        (onFileSelected)="addToQueue($event)"
         [(ngModel)]="content"
         [ngClass]="{ 'file-over': isFileOver }"
         [required]="files != undefined"

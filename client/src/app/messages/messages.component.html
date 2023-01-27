@@ -102,7 +102,7 @@
             <strong>{{ message.senderUsername | titlecase }}</strong>
           </div>
         </td>
-        <td>{{ message.messageSent + "Z" | timeago }}</td>
+        <td>{{ message.messageSent | timeago }}</td>
         <td>
           <button
             (click)="$event.stopPropagation()"

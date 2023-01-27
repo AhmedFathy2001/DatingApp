@@ -27,8 +27,9 @@ export class MessageFormComponent {
   @Output() onSubmit = new EventEmitter<{
     content: string;
     files: File[] | undefined;
+    fileUrls: string[] | undefined;
   }>();
-  mediaFiles: string[] = [];
+  mediaFiles: { id: string; url: string }[] = [];
   faImage = faImage;
   file: File | undefined;
   mediaFile: string | undefined;
@@ -36,12 +37,14 @@ export class MessageFormComponent {
   constructor(private toastr: ToastrService) {}
 
   async addToQueue(event: File[]) {
-    this.files = undefined;
-    this.mediaFiles = [];
+    if (!event) {
+      return;
+    }
+
     let files: IFile[] | undefined;
 
     if (event.length > 0) {
-      if (event.length > 6) {
+      if (this.files && this.files.length >= 6) {
         this.toastr.error('Media count should not exceed 6 per message');
         return;
       }
@@ -51,7 +54,11 @@ export class MessageFormComponent {
       });
     }
 
-    this.files = files;
+    if (this.files && files) {
+      this.files.push(...files);
+    } else {
+      this.files = files;
+    }
 
     if (files && FileReader) {
       for (let i = 0; i < files.length; i++) {
@@ -72,7 +79,7 @@ export class MessageFormComponent {
         }
         const previewUrl: string | ArrayBuffer | undefined =
           await readUploadedFileAsDataURL(files[i].file);
-        this.mediaFiles.push(previewUrl);
+        this.mediaFiles.push({ id: generateUUID(), url: previewUrl });
       }
     }
   }
@@ -82,9 +89,10 @@ export class MessageFormComponent {
     this.mediaFiles = [];
   }
 
-  removePreviewFile(fileId: string, src: string) {
+  removePreviewFile(fileId: string, mediaId: string) {
     this.files = this.files?.filter((f) => f.id !== fileId);
-    this.mediaFiles = this.mediaFiles?.filter((s) => s !== src);
+    this.mediaFiles = this.mediaFiles?.filter((s) => s.id !== mediaId);
+    console.log(this.files, this.mediaFiles);
   }
 
   resetForm() {
@@ -97,6 +105,9 @@ export class MessageFormComponent {
       content: this.content,
       files: this.files?.map((f) => {
         return f.file;
+      }),
+      fileUrls: this.mediaFiles?.map((u) => {
+        return u.url;
       }),
     });
   }
