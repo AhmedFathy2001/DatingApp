@@ -24,11 +24,6 @@ public class UserRepository : IUserRepository
         _context.Entry(user).State = EntityState.Modified;
     }
 
-    public async Task<bool> SaveAllAsync()
-    {
-        return await _context.SaveChangesAsync() > 0;
-    }
-
     public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
     {
         var query = _context.Users.AsQueryable();
@@ -71,6 +66,14 @@ public class UserRepository : IUserRepository
             .Where(user => user.UserName == username)
             .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<string> GetUserGender(string username)
+    {
+        return await _context.Users
+            .Where(x => x.UserName == username)
+            .Select(x => x.Gender)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetUsersAsync()

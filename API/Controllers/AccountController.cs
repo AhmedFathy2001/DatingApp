@@ -10,17 +10,14 @@ namespace API.Controllers;
 
 public class AccountController : BaseApiController
 {
-    private readonly ILikeRepository _likeRepository;
     private readonly IMapper _mapper;
     private readonly ITokenService _tokenService;
     private readonly UserManager<AppUser> _userManager;
 
-    public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, IMapper mapper,
-        ILikeRepository likeRepository)
+    public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, IMapper mapper)
     {
         _tokenService = tokenService;
         _mapper = mapper;
-        _likeRepository = likeRepository;
         _userManager = userManager;
     }
 

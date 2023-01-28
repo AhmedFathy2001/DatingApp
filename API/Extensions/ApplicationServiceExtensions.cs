@@ -15,10 +15,8 @@ public static class ApplicationServiceExtensions
         services.AddDbContext<DataContext>(opt => { opt.UseSqlite(config.GetConnectionString("DefaultConnection")); });
         services.AddCors();
         services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IMediaUploadService, MediaUploadService>();
-        services.AddScoped<ILikeRepository, LikesRepository>();
-        services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<LogUserActivity>();
         services.AddSingleton<PresenceTracker>();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

@@ -11,14 +11,12 @@ namespace API.Controllers;
 public class MessagesController : BaseApiController
 {
     private readonly IMediaUploadService _mediaUploadService;
-    private readonly IMessageRepository _messageRepository;
-    private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _uow;
 
-    public MessagesController(IUserRepository userRepository, IMessageRepository messageRepository,
+    public MessagesController(IUnitOfWork uow,
         IMediaUploadService mediaUploadService)
     {
-        _userRepository = userRepository;
-        _messageRepository = messageRepository;
+        _uow = uow;
         _mediaUploadService = mediaUploadService;
     }
 
@@ -44,8 +42,8 @@ public class MessagesController : BaseApiController
             return BadRequest("Media files not attached");
 
 
-        var sender = await _userRepository.GetUserByUsernameAsync(username);
-        var recipient = await _userRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername);
+        var sender = await _uow.UserRepository.GetUserByUsernameAsync(username);
+        var recipient = await _uow.UserRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername);
 
         if (recipient == null) return NotFound();
 
@@ -97,9 +95,9 @@ public class MessagesController : BaseApiController
             Media = media
         };
 
-        _messageRepository.AddMessage(message);
+        _uow.MessageRepository.AddMessage(message);
 
-        if (!await _messageRepository.SaveAllAsync()) return BadRequest("Failed to send message");
+        if (!await _uow.Complete()) return BadRequest("Failed to send message");
 
         var messageDto = new MessageDto
         {
@@ -139,7 +137,7 @@ public class MessagesController : BaseApiController
     {
         messageParams.Username = User.GetUsername();
 
-        var messages = await _messageRepository.GetMessagesForUser(messageParams);
+        var messages = await _uow.MessageRepository.GetMessagesForUser(messageParams);
 
         Response.AddPaginationHeader(new PaginationHeader(messages.CurrentPage, messages.PageSize, messages.TotalCount,
             messages.TotalPages));
@@ -148,20 +146,12 @@ public class MessagesController : BaseApiController
         return messages;
     }
 
-    [HttpGet("thread/{username}")]
-    public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessageThread(string username)
-    {
-        var currentUsername = User.GetUsername();
-
-        return Ok(await _messageRepository.GetMessageThread(currentUsername, username));
-    }
-
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> DeleteMessage(int id)
     {
         var username = User.GetUsername();
 
-        var message = await _messageRepository.GetMessage(id);
+        var message = await _uow.MessageRepository.GetMessage(id);
 
         if (message == null) return NotFound();
 
@@ -180,10 +170,10 @@ public class MessagesController : BaseApiController
                     await _mediaUploadService.DeleteMediaAsync(mediaList);
             }
 
-            _messageRepository.DeleteMessage(message);
+            _uow.MessageRepository.DeleteMessage(message);
         }
 
-        if (await _messageRepository.SaveAllAsync()) return Ok();
+        if (await _uow.Complete()) return Ok();
 
         return BadRequest("Problem deleting the message");
     }

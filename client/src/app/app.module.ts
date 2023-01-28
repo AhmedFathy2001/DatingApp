@@ -35,6 +35,7 @@ import { PhotoManagementComponent } from './admin/photo-management/photo-managem
 import { MediaModalComponent } from './modals/media-modal/media-modal.component';
 import { PinScrollDirective } from './_directives/pin-scroll.directive';
 import { RolesModalComponent } from './modals/roles-modal/roles-modal.component';
+import { ConfirmDialogComponent } from './modals/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   declarations: [
@@ -64,6 +65,7 @@ import { RolesModalComponent } from './modals/roles-modal/roles-modal.component'
     PhotoManagementComponent,
     PinScrollDirective,
     RolesModalComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
