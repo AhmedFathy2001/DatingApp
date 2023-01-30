@@ -1,6 +1,6 @@
-# fly.toml file generated for thedatingapp on 2023-01-30T13:43:14+02:00
+# fly.toml file generated for datingapp-v1 on 2023-01-30T16:52:42+02:00
 
-app = "thedatingapp"
+app = "datingapp-v1"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
@@ -12,6 +12,7 @@ processes = []
   ASPNETCORE_URLS = "http://+:8080"
   CloudinarySettings__ApiKey = "361558726654586"
   CloudinarySettings__CloudName = "dcehcr718"
+
 
 [experimental]
   auto_rollback = true
