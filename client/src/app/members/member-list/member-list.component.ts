@@ -4,6 +4,7 @@ import { MembersService } from 'src/app/_services/members.service';
 import { Pagination } from '../../_models/pagination';
 import { PageChangedEvent } from 'ngx-bootstrap/pagination';
 import { UserParams } from '../../_models/userParams';
+import { SeoService } from '../../_services/seo.service';
 
 @Component({
   selector: 'app-member-list',
@@ -26,8 +27,16 @@ export class MemberListComponent implements OnInit {
     },
   ];
 
-  constructor(private memberService: MembersService) {
+  constructor(
+    private memberService: MembersService,
+    private seoService: SeoService
+  ) {
     this.userParams = this.memberService.getUserParams();
+
+    this.seoService.updateTitleAndMeta(
+      'My matches',
+      'Start a conversation and get to know someone special. Browse through your curated list of matches on our dating app.'
+    );
   }
 
   ngOnInit(): void {

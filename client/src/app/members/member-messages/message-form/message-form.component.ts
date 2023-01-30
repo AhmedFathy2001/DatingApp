@@ -11,6 +11,11 @@ import { generateUUID } from '../../../_helpers/uuid';
 import { IFile } from '../../../_models/file';
 import { ToastrService } from 'ngx-toastr';
 import { readUploadedFileAsDataURL } from '../../../_helpers/fileReader';
+import { AccountService } from '../../../_services/account.service';
+import { take } from 'rxjs';
+import { User } from '../../../_models/user';
+import { MessageService } from '../../../_services/message.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-message-form',
@@ -19,7 +24,6 @@ import { readUploadedFileAsDataURL } from '../../../_helpers/fileReader';
 })
 export class MessageFormComponent {
   @ViewChild(MediaModalComponent) modal: MediaModalComponent | undefined;
-  // isHovering = false;
   @Input() isFileOver = false;
 
   content = '';
@@ -33,8 +37,57 @@ export class MessageFormComponent {
   faImage = faImage;
   file: File | undefined;
   mediaFile: string | undefined;
+  user: User | undefined;
+  otherUsername: string | null;
+  isTyping = false;
+  timeout: any;
+  isTypingTimeout: any;
+  wasTyping = false;
 
-  constructor(private toastr: ToastrService) {}
+  constructor(
+    private accountService: AccountService,
+    private toastr: ToastrService,
+    private messageService: MessageService,
+    private router: ActivatedRoute
+  ) {
+    this.otherUsername = this.router.snapshot.paramMap.get('username');
+    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
+      if (user) this.user = user;
+    });
+
+    this.messageService.typingStatus$.subscribe((val) => {
+      this.isTyping = val;
+    });
+  }
+
+  onInput() {
+    // if (this.isTypingTimeout) {
+    //   clearTimeout(this.isTypingTimeout);
+    // }
+
+    if (!this.wasTyping) {
+      this.wasTyping = true;
+      if (this.otherUsername) {
+        this.messageService.updateTyping(this.otherUsername, true);
+      }
+    }
+
+    // this.isTypingTimeout = setTimeout(() => {
+    //   if (this.otherUsername) {
+    //     this.messageService.updateTyping(this.otherUsername, true);
+    //   }
+    // }, 300);
+
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
+    this.timeout = setTimeout(() => {
+      if (this.otherUsername) {
+        this.messageService.updateTyping(this.otherUsername, false);
+        this.wasTyping = false;
+      }
+    }, 1000);
+  }
 
   async addToQueue(event: File[]) {
     if (!event) {
@@ -119,7 +172,6 @@ export class MessageFormComponent {
   openModal(file: File, src: string) {
     this.file = file;
     this.mediaFile = src;
-
     this.modal?.openModal();
   }
 }

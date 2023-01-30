@@ -15,6 +15,8 @@ public class DataContext : IdentityDbContext<AppUser, AppRole, int,
     }
 
 
+    public DbSet<Photo> Photos { get; set; }
+
     public DbSet<UserLike> Likes { get; set; }
 
     public DbSet<Message> Messages { get; set; }
@@ -62,5 +64,7 @@ public class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasOne(user => user.Sender)
             .WithMany(message => message.MessagesSent)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Photo>().HasQueryFilter(p => p.IsApproved);
     }
 }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from './_models/user';
 import { AccountService } from './_services/account.service';
+import { SeoService } from './_services/seo.service';
 
 @Component({
   selector: 'app-root',
@@ -10,8 +11,14 @@ import { AccountService } from './_services/account.service';
 export class AppComponent implements OnInit {
   title = 'Dating App';
   users: any;
+  messageCount = 0;
 
-  constructor(private accountService: AccountService) {}
+  constructor(
+    private accountService: AccountService,
+    private seoService: SeoService
+  ) {
+    this.seoService.updateTitleAndMeta('Loading...', 'Loading...');
+  }
 
   ngOnInit() {
     this.setCurrentUser();
@@ -24,5 +31,8 @@ export class AppComponent implements OnInit {
 
     const user: User = JSON.parse(userString);
     this.accountService.setCurrentUser(user);
+    this.accountService
+      .getNotifications()
+      .subscribe((val) => (this.messageCount = val));
   }
 }

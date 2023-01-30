@@ -16,6 +16,7 @@ import { faUserCircle } from '@fortawesome/free-solid-svg-icons';
 import { AccountService } from '../../_services/account.service';
 import { User } from '../../_models/user';
 import { take } from 'rxjs';
+import { SeoService } from '../../_services/seo.service';
 
 @Component({
   selector: 'app-member-detail',
@@ -42,7 +43,8 @@ export class MemberDetailComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     public presenceService: PresenceService,
     private accountService: AccountService,
-    private router: Router
+    private router: Router,
+    private seoService: SeoService
   ) {
     this.accountService.currentUser$.pipe(take(1)).subscribe({
       next: (user) => {
@@ -54,7 +56,13 @@ export class MemberDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.route.data.subscribe({
-      next: (data) => (this.member = data['member']),
+      next: (data) => {
+        this.member = data['member'];
+        this.seoService.updateTitleAndMeta(
+          `${this.member.knownAs}'s Details`,
+          `Get a closer look at ${this.member.knownAs}'s profile on our dating app. View their interests, photos, and personal information. Find out if there's a spark and take your interaction to the next level.`
+        );
+      },
     });
     this.route.queryParams.subscribe({
       next: (params) => {

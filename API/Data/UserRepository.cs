@@ -60,9 +60,11 @@ public class UserRepository : IUserRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<MemberDto> GetMemberByUsernameAsync(string username)
+    public async Task<MemberDto> GetMemberByUsernameAsync(string username, string currentUsername)
     {
-        return await _context.Users
+        var query = _context.Users.AsQueryable();
+        if (username == currentUsername) query = query.IgnoreQueryFilters();
+        return await query
             .Where(user => user.UserName == username)
             .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
@@ -92,7 +94,7 @@ public class UserRepository : IUserRepository
     public async Task<AppUser> GetUserByUsernameAsync(string username)
     {
         return await _context.Users
-            .Include(user => user.Photos)
+            .Include(user => user.Photos).IgnoreQueryFilters()
             .SingleOrDefaultAsync(user => user.UserName == username);
     }
 }

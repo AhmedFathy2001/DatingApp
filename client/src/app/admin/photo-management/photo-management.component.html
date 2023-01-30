@@ -1,1 +1,4 @@
-<p>photo-management works!</p>
+<div *ngIf="photos" class="row mb-3">
+  <app-photo-card *ngFor="let photo of photos" [photo]="photo" class="w-auto">
+  </app-photo-card>
+</div>

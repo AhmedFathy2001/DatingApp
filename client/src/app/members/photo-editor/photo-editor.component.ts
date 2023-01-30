@@ -7,6 +7,7 @@ import { User } from '../../_models/user';
 import { take } from 'rxjs';
 import { Photo } from '../../_models/photo';
 import { MembersService } from '../../_services/members.service';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-photo-editor',
@@ -19,6 +20,7 @@ export class PhotoEditorComponent implements OnInit {
   hasBaseDropZoneOver = false;
   baseUrl = environment.apiUrl;
   user: User | null = null;
+  faTrash = faTrash;
 
   constructor(
     private accountService: AccountService,

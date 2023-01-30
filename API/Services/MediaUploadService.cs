@@ -56,7 +56,7 @@ public class MediaUploadService : IMediaUploadService
     {
         var uploadResult = new ImageUploadResult();
 
-        if (file.Length <= 0) return uploadResult;
+        if (file is not { Length: > 0 }) return uploadResult;
 
         await using var stream = file.OpenReadStream();
         var transformation = isProfilePicture

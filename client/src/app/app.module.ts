@@ -36,6 +36,7 @@ import { MediaModalComponent } from './modals/media-modal/media-modal.component'
 import { PinScrollDirective } from './_directives/pin-scroll.directive';
 import { RolesModalComponent } from './modals/roles-modal/roles-modal.component';
 import { ConfirmDialogComponent } from './modals/confirm-dialog/confirm-dialog.component';
+import { PhotoCardComponent } from './admin/photo-management/photo-card/photo-card.component';
 
 @NgModule({
   declarations: [
@@ -66,6 +67,7 @@ import { ConfirmDialogComponent } from './modals/confirm-dialog/confirm-dialog.c
     PinScrollDirective,
     RolesModalComponent,
     ConfirmDialogComponent,
+    PhotoCardComponent,
   ],
   imports: [
     BrowserModule,

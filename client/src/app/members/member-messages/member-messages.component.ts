@@ -73,19 +73,6 @@ export class MemberMessagesComponent {
           this.busyService.idle();
         }
       });
-
-    // .subscribe((event: HttpEvent<any>) => {
-    //   if (event.type === HttpEventType.Response) {
-    //     if (event.ok) {
-    //       if (this.form) {
-    //         this.form.resetForm();
-    //       }
-    //       if (event.body) {
-    //         this.messages.push(event.body);
-    //       }
-    //     }
-    //   }
-    // });
   }
 
   validateFiles(files: File[], fileUrls: string[]): IMediaFile[] | undefined {

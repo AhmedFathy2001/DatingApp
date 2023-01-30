@@ -84,6 +84,11 @@ public class MessageRepository : IMessageRepository
         return await PagedList<MessageDto>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
     }
 
+    public int GetUnreadCountForUser(string username)
+    {
+        return _context.Messages.Count(m => m.DateRead == null && m.RecipientUsername == username);
+    }
+
     public async Task<IEnumerable<MessageDto>> GetMessageThread(string currentUsername, string recipientUsername)
     {
         var query = _context.Messages

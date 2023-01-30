@@ -5,19 +5,20 @@ import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { User } from '../_models/user';
 import { PresenceService } from './presence.service';
+import { MessageService } from './message.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AccountService {
   baseUrl = environment.apiUrl;
-
   private currentUserSource = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSource.asObservable();
 
   constructor(
     private http: HttpClient,
-    private presenceService: PresenceService
+    private presenceService: PresenceService,
+    private messageService: MessageService
   ) {}
 
   login(model: any) {
@@ -26,6 +27,7 @@ export class AccountService {
         const user = res;
         if (user) {
           this.setCurrentUser(user);
+          this.presenceService.createHubConnection(user);
         }
       })
     );
@@ -38,8 +40,8 @@ export class AccountService {
     Array.isArray(roles) ? (user.roles = roles) : user.roles.push(roles);
 
     localStorage.setItem('user', JSON.stringify(user));
-    this.currentUserSource.next(user);
     this.presenceService.createHubConnection(user);
+    this.currentUserSource.next(user);
   }
 
   register(model: any) {
@@ -60,5 +62,17 @@ export class AccountService {
 
   getDecodedToken(token: string) {
     return JSON.parse(atob(token.split('.')[1]));
+  }
+
+  setInitNotifications() {
+    return this.http.get<number>(`${this.baseUrl}messages/unread-count`);
+  }
+
+  getNotifications() {
+    return this.presenceService.messageCount$;
+  }
+
+  getNotificationsInMessages() {
+    return this.messageService.messageCount$;
   }
 }

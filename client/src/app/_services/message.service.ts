@@ -19,6 +19,10 @@ export class MessageService {
   private hubConnection?: HubConnection;
   private messageThreadSource = new BehaviorSubject<Message[]>([]);
   messageThread$ = this.messageThreadSource.asObservable();
+  private messageCountSource = new BehaviorSubject<number>(0);
+  messageCount$ = this.messageCountSource.asObservable();
+  private typingStatusSource = new BehaviorSubject<boolean>(false);
+  typingStatus$ = this.typingStatusSource.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -32,9 +36,13 @@ export class MessageService {
 
     this.hubConnection.start().catch(console.log);
 
-    this.hubConnection.on('ReceiveMessageThread', (messages) => {
-      this.messageThreadSource.next(messages);
-    });
+    this.hubConnection.on(
+      'ReceiveMessageThread',
+      ({ messages, notificationCount }) => {
+        this.messageThreadSource.next(messages);
+        this.messageCountSource.next(notificationCount);
+      }
+    );
 
     this.hubConnection.on('UpdatedGroup', (group: Group) => {
       if (group.connections.some((x) => x.username === otherUsername)) {
@@ -58,6 +66,11 @@ export class MessageService {
         },
       });
     });
+
+    this.hubConnection.on('UserIsTyping', (_, isTyping) => {
+      console.log(isTyping);
+      this.typingStatusSource.next(isTyping);
+    });
   }
 
   stopHubConnection() {
@@ -79,6 +92,14 @@ export class MessageService {
   getMessageThread(username: string) {
     return this.http.get<Message[]>(
       `${this.baseUrl}messages/thread/` + username
+    );
+  }
+
+  async updateTyping(recipientUsername: string, isTyping: boolean) {
+    return this.hubConnection?.invoke(
+      'TypingStatus',
+      recipientUsername,
+      isTyping
     );
   }
 

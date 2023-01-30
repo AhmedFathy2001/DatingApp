@@ -11,12 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace API.SignalR;
 
-public interface IData
-{
-    public string Url { get; set; }
-    public MediaType MediaType { get; set; }
-}
-
 [Authorize]
 public class MessageHub : Hub
 {
@@ -47,7 +41,18 @@ public class MessageHub : Hub
 
         if (_uow.HasChanges()) await _uow.Complete();
 
-        await Clients.Caller.SendAsync("ReceiveMessageThread", messages);
+        var messageDtos = messages.ToList();
+        var notificationCount = 0;
+        if (_uow.HasChanges())
+            notificationCount = _uow.MessageRepository.GetUnreadCountForUser(Context.User.GetUsername()) + 1 -
+                                messageDtos.Count(m => m.DateRead == null);
+        else
+            notificationCount = _uow.MessageRepository.GetUnreadCountForUser(Context.User.GetUsername());
+        await Clients.Caller.SendAsync("ReceiveMessageThread", new
+        {
+            messages = messageDtos,
+            notificationCount
+        });
     }
 
     public override async Task OnDisconnectedAsync(Exception exception)
@@ -164,7 +169,11 @@ public class MessageHub : Hub
             var connections = await PresenceTracker.GetConnectionsForUser(recipientUsername);
             if (connections != null)
                 await _presenceHub.Clients.Clients(connections).SendAsync("NewMessageReceived",
-                    new { username = sender.UserName, knownAs = sender.KnownAs });
+                    new
+                    {
+                        username = sender.UserName, knownAs = sender.KnownAs,
+                        notificationCount = _uow.MessageRepository.GetUnreadCountForUser(recipient.UserName) + 1
+                    });
         }
 
         _uow.MessageRepository.AddMessage(message);
@@ -187,6 +196,23 @@ public class MessageHub : Hub
             MessageSent = DateTime.UtcNow
         };
         await Clients.Group(groupName).SendAsync("NewMessage", messageDto);
+    }
+
+    public async Task TypingStatus(string recipientUsername, bool isTyping)
+    {
+        var username = Context.User.GetUsername();
+
+        if (username == recipientUsername.ToLower())
+            throw new HubException("Can't update typing status.");
+
+        var sender = await _uow.UserRepository.GetUserByUsernameAsync(username);
+        var recipient = await _uow.UserRepository.GetUserByUsernameAsync(recipientUsername);
+
+        if (recipient == null) throw new HubException("Not Found");
+
+        var groupName = GetGroupName(sender.UserName, recipient.UserName);
+
+        await Clients.OthersInGroup(groupName).SendAsync("UserIsTyping", username, isTyping);
     }
 
     private async Task<Group> AddToGroup(string groupName)

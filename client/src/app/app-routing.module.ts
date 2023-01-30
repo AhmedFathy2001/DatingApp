@@ -14,9 +14,10 @@ import { PreventUnsavedChangesGuard } from './_guards/prevent-unsaved-changes.gu
 import { MemberDetailedResolver } from './_resolvers/member-detailed.resolver';
 import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
 import { AdminGuard } from './_guards/admin.guard';
+import { RegisterGuard } from './_guards/register.guard';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', component: HomeComponent, canActivate: [RegisterGuard] },
   {
     path: '',
     runGuardsAndResolvers: 'always',
@@ -42,7 +43,7 @@ const routes: Routes = [
       },
     ],
   },
-  { path: 'errors', component: TestErrorComponent },
+  { path: 'errors', component: TestErrorComponent, canActivate: [AdminGuard] },
   { path: 'not-found', component: NotFoundComponent },
   { path: 'server-error', component: ServerErrorComponent },
   { path: '**', component: NotFoundComponent, pathMatch: 'full' },

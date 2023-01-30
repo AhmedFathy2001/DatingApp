@@ -14,6 +14,8 @@ export class PresenceService {
   private hubConnection?: HubConnection;
   private onlineUsersSource = new BehaviorSubject<string[]>([]);
   onlineUsers$ = this.onlineUsersSource.asObservable();
+  private messageCountSource = new BehaviorSubject<number>(0);
+  messageCount$ = this.messageCountSource.asObservable();
 
   constructor(private toastr: ToastrService, private router: Router) {}
 
@@ -43,14 +45,19 @@ export class PresenceService {
       this.onlineUsersSource.next(usernames);
     });
 
-    this.hubConnection.on('NewMessageReceived', ({ username, knownAs }) => {
-      this.toastr
-        .info(`${knownAs} has sent you a message.`)
-        .onTap.pipe(take(1))
-        .subscribe(() => {
-          this.router.navigateByUrl(`/members/${username}?tab=Messages`);
-        });
-    });
+    this.hubConnection.on(
+      'NewMessageReceived',
+      ({ username, knownAs, notificationCount }) => {
+        this.toastr
+          .info(`${knownAs} has sent you a message.`)
+          .onTap.pipe(take(1))
+          .subscribe(() => {
+            this.router.navigateByUrl(`/members/${username}?tab=Messages`);
+          });
+
+        this.messageCountSource.next(notificationCount);
+      }
+    );
   }
 
   stopHubConnection() {

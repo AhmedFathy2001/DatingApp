@@ -8,6 +8,7 @@ import {
   faEnvelopeOpen,
   faPaperPlane,
 } from '@fortawesome/free-solid-svg-icons';
+import { SeoService } from '../_services/seo.service';
 
 @Component({
   selector: 'app-messages',
@@ -25,7 +26,15 @@ export class MessagesComponent implements OnInit {
   faEnvelopeOpen = faEnvelopeOpen;
   faPaperPlane = faPaperPlane;
 
-  constructor(private messageService: MessageService) {}
+  constructor(
+    private messageService: MessageService,
+    private seoService: SeoService
+  ) {
+    this.seoService.updateTitleAndMeta(
+      'Messages',
+      'Stay in touch with your matches and build deeper relationships. Access your unread messages, inbox, and outbox on our messaging page.'
+    );
+  }
 
   ngOnInit(): void {
     this.loadMessages();

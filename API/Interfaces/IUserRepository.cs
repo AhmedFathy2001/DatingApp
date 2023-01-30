@@ -18,6 +18,6 @@ public interface IUserRepository
 
     Task<MemberDto> GetMemberByIdAsync(int id);
 
-    Task<MemberDto> GetMemberByUsernameAsync(string username);
+    Task<MemberDto> GetMemberByUsernameAsync(string username, string currentUsername);
     Task<string> GetUserGender(string username);
 }

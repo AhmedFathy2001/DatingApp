@@ -146,6 +146,17 @@ public class MessagesController : BaseApiController
         return messages;
     }
 
+    [HttpGet("unread-count")]
+    public ActionResult<int> GetUnreadCountForUser()
+    {
+        var username = User.GetUsername();
+
+        var messagesCount = _uow.MessageRepository.GetUnreadCountForUser(username);
+
+        return messagesCount;
+    }
+
+
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> DeleteMessage(int id)
     {

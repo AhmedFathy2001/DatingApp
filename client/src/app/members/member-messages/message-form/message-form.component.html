@@ -33,6 +33,9 @@
     </div>
   </div>
 
+  <div *ngIf="isTyping" class="is-typing mb-2">
+    {{ otherUsername | titlecase }} is typing...
+  </div>
   <form (ngSubmit)="onSubmitForm()">
     <div class="input-group">
       <div class="image-upload">
@@ -62,6 +65,7 @@
       </div>
       <input
         (fileOver)="onFileOver($event)"
+        (input)="onInput()"
         (onFileDrop)="addToQueue($event)"
         [(ngModel)]="content"
         [ngClass]="{ 'file-over': isFileOver }"

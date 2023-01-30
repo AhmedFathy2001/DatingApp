@@ -6,6 +6,7 @@ import { MembersService } from '../../_services/members.service';
 import { take } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { NgForm } from '@angular/forms';
+import { SeoService } from '../../_services/seo.service';
 
 @Component({
   selector: 'app-member-edit',
@@ -20,11 +21,17 @@ export class MemberEditComponent implements OnInit {
   constructor(
     private accountService: AccountService,
     private memberService: MembersService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private seoService: SeoService
   ) {
     this.accountService.currentUser$.pipe(take(1)).subscribe({
       next: (user) => (this.user = user),
     });
+
+    this.seoService.updateTitleAndMeta(
+      'Edit Profile',
+      'Attract the right matches by keeping your profile up-to-date. Edit your profile information and photos on our dating app.'
+    );
   }
 
   @HostListener('window:beforeunload', ['$event']) unloadNotification(

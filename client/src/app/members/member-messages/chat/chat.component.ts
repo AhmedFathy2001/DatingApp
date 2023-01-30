@@ -21,7 +21,6 @@ import { MessageService } from '../../../_services/message.service';
 export class ChatComponent {
   @ViewChild(MediaModalComponent) modal: MediaModalComponent | undefined;
   @Input() username: string | undefined;
-  // @Input() messages: Message[] = [];
   fragment: string | null = null;
   faClock = faClock;
   faCirclePlay = faCirclePlay;

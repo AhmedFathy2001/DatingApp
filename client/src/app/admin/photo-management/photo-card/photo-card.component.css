@@ -1,0 +1,14 @@
+.photo-container {
+  width: 190px;
+  transition: 0.3s all;
+}
+
+.hidden {
+  width: 0;
+  opacity: 0;
+  height: 100%;
+}
+
+.hidden-display {
+  display: none;
+}
