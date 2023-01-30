@@ -14,7 +14,7 @@ export class ListsComponent implements OnInit {
   members: Member[] | undefined;
   isLiked = true;
   pageNumber = 1;
-  pageSize = 6;
+  pageSize = 5;
   pagination: Pagination | undefined;
   componentOpacity = 1;
 

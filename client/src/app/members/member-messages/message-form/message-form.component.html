@@ -80,18 +80,21 @@
       <div class="input-group-append">
         <button
           [disabled]="
-            ((content && content.trim().length === 0) || !content) &&
-            files == undefined
+            (((content && content.trim().length === 0) || !content) &&
+              files == undefined) ||
+            loading
           "
           [ngClass]="{
             disabled:
-              ((content && content.trim().length === 0) || !content) &&
-              files == undefined
+              (((content && content.trim().length === 0) || !content) &&
+                files == undefined) ||
+              loading
           }"
           class="btn btn-primary"
           type="submit"
         >
           Send
+          <fa-icon *ngIf="loading" [icon]="faSpinner" [spin]="true"></fa-icon>
         </button>
       </div>
     </div>

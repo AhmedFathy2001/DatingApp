@@ -19,6 +19,7 @@ export class MemberMessagesComponent {
   @Input() username: string | undefined;
   user: User | null = null;
   isHovering = false;
+  loading = false;
 
   constructor(
     public messageService: MessageService,
@@ -41,7 +42,7 @@ export class MemberMessagesComponent {
     fileUrls: string[] | undefined;
   }) {
     const { content, files } = event;
-
+    this.loading = true;
     const mediaFiles: IMediaFile[] = [];
     if (!this.username) return;
 
@@ -72,7 +73,8 @@ export class MemberMessagesComponent {
           this.form.resetForm();
           this.busyService.idle();
         }
-      });
+      })
+      .finally(() => (this.loading = false));
   }
 
   validateFiles(files: File[], fileUrls: string[]): IMediaFile[] | undefined {

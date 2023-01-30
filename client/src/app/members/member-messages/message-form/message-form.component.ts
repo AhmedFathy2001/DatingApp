@@ -5,7 +5,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { faImage } from '@fortawesome/free-solid-svg-icons';
+import { faImage, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { MediaModalComponent } from '../../../modals/media-modal/media-modal.component';
 import { generateUUID } from '../../../_helpers/uuid';
 import { IFile } from '../../../_models/file';
@@ -25,8 +25,9 @@ import { ActivatedRoute } from '@angular/router';
 export class MessageFormComponent {
   @ViewChild(MediaModalComponent) modal: MediaModalComponent | undefined;
   @Input() isFileOver = false;
-
+  @Input() loading = false;
   content = '';
+  faSpinner = faSpinner;
   files: IFile[] | undefined;
   @Output() onSubmit = new EventEmitter<{
     content: string;
@@ -41,7 +42,6 @@ export class MessageFormComponent {
   otherUsername: string | null;
   isTyping = false;
   timeout: any;
-  isTypingTimeout: any;
   wasTyping = false;
 
   constructor(
@@ -61,22 +61,12 @@ export class MessageFormComponent {
   }
 
   onInput() {
-    // if (this.isTypingTimeout) {
-    //   clearTimeout(this.isTypingTimeout);
-    // }
-
     if (!this.wasTyping) {
       this.wasTyping = true;
       if (this.otherUsername) {
         this.messageService.updateTyping(this.otherUsername, true);
       }
     }
-
-    // this.isTypingTimeout = setTimeout(() => {
-    //   if (this.otherUsername) {
-    //     this.messageService.updateTyping(this.otherUsername, true);
-    //   }
-    // }, 300);
 
     if (this.timeout) {
       clearTimeout(this.timeout);
